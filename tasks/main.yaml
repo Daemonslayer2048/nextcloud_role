@@ -1,0 +1,31 @@
+- name: Include NextCloud Base Packages
+  include: install.yaml
+
+- name: Include PHP
+  include: php.yaml
+
+- name: Include HTTPd
+  include: httpd.yaml
+
+- name: Include Mariadb
+  include: mariadb.yaml
+
+- name: Include Redis
+  include: redis.yaml
+
+- name: Setup NextCloud
+  include: setup.yaml
+
+- name: Include SELinux
+  include: selinux.yaml
+
+- name: Include Firewalld
+  include: firewalld.yaml
+
+- name: Add Caddy Config for NextCloud
+  delegate_to: "{{ groups['Caddy'][0] }}"
+  ansible.builtin.template:
+    src: ./templates/caddy_config.j2
+    dest: /etc/caddy/sites-enabled/nextcloud_config
+  notify:
+    - Restart Caddy

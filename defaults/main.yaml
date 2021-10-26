@@ -1,0 +1,21 @@
+# Host Section
+host_name: cloud
+host_public_domain: null.com
+
+# Nextcloud Section
+nc_base_url: https://download.nextcloud.com/server/releases/
+nc_version: latest
+nc_admin_user: admin
+# THis gets pushed into a shell, so special chars need to be considered
+nc_admin_password: Password1
+nc_data_path: /var/www/nextcloud/data
+
+# PHP Section
+php_mem_limit: 2048
+
+# MySQL Section
+mysql_encoding: utf8mb4
+mysql_root_password: Password1!
+mysql_application_database: nextcloud
+mysql_application_user: nextcloud
+mysql_application_password: Password1!

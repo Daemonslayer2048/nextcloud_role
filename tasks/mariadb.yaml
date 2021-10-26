@@ -1,0 +1,64 @@
+- name: Install Mariadb
+  ansible.builtin.dnf:
+    state: present
+    name:
+      - mariadb
+      - mariadb-server
+
+- name: Install Ansible PIP Requirements
+  ansible.builtin.pip:
+    name:
+      - PyMySQL
+
+- name: Enable MariaDB Service
+  ansible.builtin.service:
+    name: mariadb
+    state: started
+    enabled: yes
+
+# Begin mysql_secure_installation
+- name: Remove anonymous user account for localhost
+  ignore_errors: True
+  community.mysql.mysql_user:
+    name: ''
+    host_all: yes
+    state: absent
+
+- name: Delete test Database
+  ignore_errors: True
+  community.mysql.mysql_db:
+    name: test
+    state: absent
+
+# Make sure this is set in vars/mariadb.yaml
+- name: Update MariaDB root password
+  ignore_errors: True
+  community.mysql.mysql_user:
+    name: root
+    host: "{{ item }}"
+    password: "{{ mysql_root_password }}"
+  with_items:
+    - 127.0.0.1
+    - ::1
+    - localhost
+
+# Create Application Database
+- name: Create Application Database
+  community.mysql.mysql_db:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    encoding: "{{ mysql_encoding | default(\"\") }}"
+    collation: "{{ mysql.collation | default(\"\") }}"
+    name:
+      - "{{ mysql_application_database }}"
+    state: present
+
+- name: Create Application User
+  community.mysql.mysql_user:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    name: "{{ mysql_application_user }}"
+    password: "{{ mysql_application_password }}"
+    priv: "{{ mysql_application_database }}.*:ALL"
+    host: 127.0.0.1
+    state: present

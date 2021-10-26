@@ -1,0 +1,15 @@
+- name: Restart Caddy
+  delegate_to: "{{ groups['Caddy'][0] }}"
+  ansible.builtin.systemd:
+    name: caddy
+    state: restarted
+
+- name: Restart php-fpm
+  ansible.builtin.systemd:
+    name: php-fpm
+    state: restarted
+
+- name: Restart httpd
+  ansible.builtin.systemd:
+    name: httpd
+    state: restarted

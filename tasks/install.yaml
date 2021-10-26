@@ -1,0 +1,25 @@
+- name: Enable codeready-builder Repository
+  rhsm_repository:
+    name: codeready-builder-for-rhel-8-x86_64-rpms
+  when: ansible_distribution == 'RedHat'
+
+- name: Install EPEL
+  ansible.builtin.package:
+    name: epel-release
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Fedora'
+
+- name: Install EPEL (For RHEL)
+  ansible.builtin.yum:
+    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    state: present
+    disable_gpg_check: yes
+  when: ansible_distribution == 'RedHat'
+
+- name: Install NextCloud Requirements
+  ansible.builtin.dnf:
+    state: present
+    name:
+      - yum-utils
+      - unzip
+      - bash-completion
+      - bzip2

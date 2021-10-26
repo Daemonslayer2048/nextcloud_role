@@ -1,0 +1,5 @@
+{{ ansible_facts['hostname'] }}.{{ host_public_domain }} {
+  rewrite /.well-known/carddav /remote.php/dav
+  rewrite /.well-known/caldav /remote.php/dav
+  reverse_proxy * {{ groups['NextCloud'][0] }}:80
+}

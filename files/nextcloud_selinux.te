@@ -1,0 +1,2 @@
+#============= rhsmcertd_t ==============
+allow rhsmcertd_t gpg_exec_t:file execute;

@@ -1,0 +1,30 @@
+- name: Enable httpd_can_network_connect Boolean
+  ansible.posix.seboolean:
+    name: httpd_can_network_connect
+    state: yes
+    persistent: yes
+
+- name: Enable httpd_unified Boolean
+  ansible.posix.seboolean:
+    name: httpd_unified
+    state: yes
+    persistent: yes
+
+- name: Set Semanage Fcontext Rules
+  community.general.sefcontext:
+    target: "/var/www/nextcloud/{{ item }}(/.*)?"
+    setype: httpd_sys_rw_content_t
+    state: present
+  loop:
+    - "data(/.*)?"
+    - "config(/.*)?"
+    - "apps(/.*)?"
+    - ".htaccess"
+    - ".user.ini"
+    - "3rdparty/aws/aws-sdk-php/src/data/logs(/.*)?"
+  register: fcontext
+
+- name: Apply new SELinux file context to filesystem
+  ansible.builtin.command:
+    cmd: restorecon -R '/var/www/nextcloud/'
+  when: fcontext.changed

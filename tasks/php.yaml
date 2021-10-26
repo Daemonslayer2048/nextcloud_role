@@ -1,0 +1,77 @@
+# ansible.builtin.dnf does not appear to import the keys automatically, so this
+# needs to be done manually.
+- name: Add Base REMI GPG Key
+  ansible.builtin.rpm_key:
+    state: present
+    key: https://rpms.remirepo.net/RPM-GPG-KEY-remi
+
+- name: Add 2020 REMI GPG Key
+  ansible.builtin.rpm_key:
+    state: present
+    key: https://rpms.remirepo.net/RPM-GPG-KEY-remi2020
+
+- name: Add 2019 REMI GPG Key
+  ansible.builtin.rpm_key:
+    state: present
+    key: https://rpms.remirepo.net/RPM-GPG-KEY-remi2019
+
+- name: Add 2018 REMI GPG Key
+  ansible.builtin.rpm_key:
+    state: present
+    key: https://rpms.remirepo.net/RPM-GPG-KEY-remi2018
+
+- name: Install REMI Repo
+  ansible.builtin.dnf:
+    name: https://rpms.remirepo.net/enterprise/remi-release-8.rpm
+    state: present
+
+# Technically I should need to do a module reset after this, but that does not
+# appear to be needed here......for reasons? Can confirm this does install
+# php7.4 though.......¯\_(ツ)_/¯
+- name: Enable php:remi
+  ansible.builtin.copy:
+    dest: /etc/dnf/modules.d/php.module
+    content: |
+      [php]
+      name=php
+      stream=remi-8.0
+      profiles=common
+      state=enabled
+
+- name: Install PHP Requirements
+  ansible.builtin.dnf:
+    state: present
+    name:
+      - php
+      - php-gd
+      - php-mbstring
+      - php-intl
+      - php-pecl-apcu
+      - php-mysqlnd
+      - php-opcache
+      - php-json
+      - php-zip
+      - php-redis
+      - php-imagick
+      - php-posix
+      - php-ldap
+      - php-smbclient
+      - php-imap
+      - php-bcmath
+      - php-gmp
+
+- name: Set PHP Memory Limit
+  ansible.builtin.lineinfile:
+    path: /etc/php.ini
+    state: present
+    regexp: '^memory_limit\s+=\s+\d+M\S*$'
+    line: "memory_limit = {{ php_mem_limit }}M"
+  notify:
+    - Restart php-fpm
+    - Restart httpd
+
+- name: Enable php-fpm Service
+  ansible.builtin.service:
+    name: php-fpm
+    state: started
+    enabled: yes

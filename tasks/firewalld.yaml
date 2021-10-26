@@ -1,0 +1,14 @@
+- name: Allow HASS Through Firewalld
+  ansible.posix.firewalld:
+    rich_rule: rule family="ipv4" source address="{{ groups['Caddy'][0] }}" port port="80" protocol="tcp" accept
+    zone: public
+    permanent: yes
+    immediate: yes
+    state: enabled
+  register: firewalld
+
+- name: Reload Firewalld
+  systemd:
+    name: firewalld
+    state: reloaded
+  when: firewalld.changed

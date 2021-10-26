@@ -1,0 +1,94 @@
+- name: Check if NextCloud Has Been Installed
+  ansible.builtin.stat:
+    path: "/var/www/nextcloud/config/config.php"
+  register: nextcloud_config
+
+- name: Download NextCloud Zip File
+  ansible.builtin.get_url:
+    url: "{{ nc_base_url }}{{ nc_version }}.zip"
+    dest: /tmp/
+  when: not nextcloud_config.stat.exists
+
+- name: Unpack NextCloud Zip File
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ nc_version }}.zip"
+    dest: /var/www/
+    remote_src: yes
+  when: not nextcloud_config.stat.exists
+
+- name: Create NextCloud Data Directory
+  ansible.builtin.file:
+    path: "{{ nc_data_path }}"
+    owner: apache
+    group: apache
+    state: directory
+    mode: '0755'
+
+- name: Set File User and Group Permissions Recursively
+  ansible.builtin.file:
+    dest: /var/www/nextcloud/
+    owner: apache
+    group: apache
+    recurse: yes
+
+- name: Setup NextCloud Config
+  become_user: apache
+  become: yes
+  ansible.builtin.command:
+    chdir: /var/www/nextcloud/
+    cmd: |
+      php occ maintenance:install
+      --database mysql
+      --database-host "127.0.0.1"
+      --database-name {{ mysql_application_database }}
+      --database-user {{ mysql_application_user }}
+      --database-pass {{ mysql_application_password }}
+      --admin-user {{ nc_admin_user }}
+      --admin-pass {{ nc_admin_password }}
+      --data-dir {{ nc_data_path }}
+  when: not nextcloud_config.stat.exists
+
+- name: Setup NextCloud trusted_proxies
+  become_user: apache
+  become: yes
+  ansible.builtin.command:
+    chdir: /var/www/nextcloud/
+    cmd: |
+      php occ config:system:set
+      trusted_proxies 0 --value={{ groups['Caddy'][0] }}
+
+- name: Setup NextCloud trusted_domains
+  become_user: apache
+  become: yes
+  ansible.builtin.command:
+    chdir: /var/www/nextcloud/
+    cmd: |
+      php occ config:system:set
+      trusted_domains 0 --value={{ host_name }}.{{ host_public_domain }}
+
+- name: Setup NextCloud overwriteprotocol
+  become_user: apache
+  become: yes
+  ansible.builtin.command:
+    chdir: /var/www/nextcloud/
+    cmd: |
+      php occ config:system:set
+      overwriteprotocol --value=https
+
+- name: Setup NextCloud redis host
+  become_user: apache
+  become: yes
+  ansible.builtin.command:
+    chdir: /var/www/nextcloud/
+    cmd: |
+      php occ config:system:set
+      redis host --value=localhost
+
+- name: Setup NextCloud redis port
+  become_user: apache
+  become: yes
+  ansible.builtin.command:
+    chdir: /var/www/nextcloud/
+    cmd: |
+      php occ config:system:set
+      redis port --value=6379
