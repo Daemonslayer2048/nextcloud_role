@@ -1,0 +1,11 @@
+- name: Converge
+  vars_files:
+    - testing_vars.yaml
+  hosts: all
+  tasks:
+    - name: "Include Common Role"
+      include_role:
+        name: "common"
+    - name: "Include NexTCloud"
+      include_role:
+        name: "nextcloud_role"

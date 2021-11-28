@@ -1,38 +1,89 @@
-Role Name
-=========
+# Ansible Server NextCloud Role  
+## Summary
+__Graph:__
+``` mermaid
+graph LR;
+  subgraph Roles
+    common_role-->nextcloud_role;
+    common_role-.->caddy_role;
+  end
+  subgraph Hosts
+    nextcloud_role-->NextCloud;
+    caddy_role-.->Caddy;
+    Router-.Ports 80,443.->Caddy;
+    Caddy-.Port 80.->NextCloud;
+  end
+```
+This roles setups up a [NextCloud](https://nextcloud.com/) server. This role setup and installs mariadb, nextcloud and the required php files. When a Caddy reverse proxy is provided in the ansible inventory file the NextCloud hosts firewall will be opened allowing caddy to access NextCloud on port 80, create a Caddy proxy file, etc.
 
-A brief description of the role goes here.
+## Requirements
+### ansible-galaxy
+__Collections:__
+  - [community.general](https://docs.ansible.com/ansible/latest/collections/community/general/index.html)
 
-Requirements
-------------
+__Roles:__
+  - [daemonslayer2048.common](https://github.com/Daemonslayer2048/common_role)
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+## Variables
+| Variable | Type | Required | Default | Example |
+|    -     |   -  |     -    |    -    |    -    |
+| hostname | string | True | N/A | cloud |
+| host_public_domain | string | True | N/A | null.com |
+| nc_base_url | string | True | https://download.nextcloud.com/server/releases/ | https://download.nextcloud.com/server/releases/|
+| nc_version | string | True | latest | nextcloud-9.0.53 |
+| nc_data_path | string | True | /var/www/nextcloud/data | /var/www/nextcloud/data |
+| nc_admin_user | string | True | N/A | admin |
+| nc_admin_password | string | True | N/A | Password1! |
+| php_mem_limit | int | True | 2048 | 2048 |
+| mysql_encoding | string | True | utf8mb4 | utf8mb4 |
+| mysql_application_database | string | True | nextcloud | nextcloud |
+| mysql_application_user | string | True | nextcloud | nextcloud |
+| mysql_root_password | string | True | N/A | Password1! |
+| mysql_application_password | string | True | N/A | Password1! |
 
-Role Variables
---------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+### Variable Summaries:
+#### hostname
+This is used in multiple locations to set the FQDN of the server and to be used in setting the public URL for the server when the [Caddy reverse proxy role](https://github.com/Daemonslayer2048/caddy_role) is deployed.
 
-Dependencies
-------------
+#### host_public_domain
+Completes the domain portion of the public URL with the help of the variable above.
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+#### nc_base_url
+This is the base URL of the the nextcloud download directory, unless you are pulling from a mirror you should not need to change this.
 
-Example Playbook
-----------------
+#### nc_version
+The version of zip file to download, by default this is set to the latest package available.
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+#### nc_data_path
+Where NextCloud should store its data, changing this is not recommended as it will most likely cause SELinux permission errors at the very least and this role (as of now) will not correct for this.
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+#### nc_admin_user
+The default administrator to create for the instance. When using this role the install screen will not appear as the admin user and database setup is already handled. You will need to use this user to login.
 
-License
--------
+#### nc_admin_password
+The admin users password.
+__Note:__ The password is piped into the php occ command so special characters can cause problems, be aware of this and avoid certain special characters.
 
-BSD
+#### php_mem_limit
+The memory limit to set for php fpm.
 
-Author Information
-------------------
+#### mysql_encoding
+The mysql database encoding to set, this should most likely not be changed.
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+#### mysql_application_database
+The name of the database NextCloud should use.
+
+#### mysql_application_user
+The user Nextcloud will use to authenticate to the database.
+
+#### mysql_root_password
+The root password to set for the Mariadb service.
+
+#### mysql_application_password
+The application user NextCloud will use for authentication to the server.
+
+
+## Notes:
+### Testing Issues
+  - Selinux Modules can not be tested in podman so these tests are performed outside of the stesting suite :(

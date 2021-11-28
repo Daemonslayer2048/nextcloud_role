@@ -17,7 +17,7 @@
 
 - name: Add NextCloud Config to HTTPd
   vars:
-    ServerName: "{{ host_name }}.{{ host_public_domain }}"
+    ServerName: "{{ hostname }}.{{ host_public_domain }}"
   ansible.builtin.template:
     src: ./templates/nextcloud_httpd_config.j2
     dest: /etc/httpd/conf.d/nextcloud.conf

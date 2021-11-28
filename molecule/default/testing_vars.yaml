@@ -1,0 +1,14 @@
+testing: True
+
+# Host Section
+hostname: cloud
+host_public_domain: null.com
+
+# Nextcloud Section
+nc_admin_user: admin
+# This gets pushed into a shell, so special chars need to be considered
+nc_admin_password: Password1
+
+# MySQL Section
+mysql_root_password: Password1!
+mysql_application_password: Password1!

@@ -1,0 +1,5 @@
+roles:
+  - name: common
+    src: https://github.com/Daemonslayer2048/common_role.git
+collections:
+  - community.general

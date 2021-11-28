@@ -1,0 +1,34 @@
+dependency:
+  name: galaxy
+  options:
+    role-file: requirements.yaml
+    requirements-file: requirements.yml
+driver:
+  name: podman
+lint: ansible-lint
+platforms:
+#  - name: rhel-8
+#    image: registry.access.redhat.com/ubi8/ubi-init
+#    pre_build_image: true
+#    volumes:
+#      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+#    privileged: true
+#    command: "/usr/sbin/init"
+  - name: cent-stream
+    image: quay.io/centos/centos:stream
+    pre_build_image: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    command: "/usr/sbin/init"
+  - name: cent-8
+    image: quay.io/centos/centos:8
+    pre_build_image: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    command: "/usr/sbin/init"
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint

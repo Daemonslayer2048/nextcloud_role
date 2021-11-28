@@ -6,6 +6,7 @@
     immediate: yes
     state: enabled
   register: firewalld
+  when: groups['Caddy'] is defined and (groups['Caddy'] | length > 0)
 
 - name: Reload Firewalld
   systemd:
