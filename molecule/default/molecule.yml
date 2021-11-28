@@ -7,13 +7,13 @@ driver:
   name: podman
 lint: ansible-lint
 platforms:
-#  - name: rhel-8
-#    image: registry.access.redhat.com/ubi8/ubi-init
-#    pre_build_image: true
-#    volumes:
-#      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-#    privileged: true
-#    command: "/usr/sbin/init"
+  - name: rhel-8
+    image: registry.access.redhat.com/ubi8/ubi-init
+    pre_build_image: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    command: "/usr/sbin/init"
   - name: cent-stream
     image: quay.io/centos/centos:stream
     pre_build_image: true
