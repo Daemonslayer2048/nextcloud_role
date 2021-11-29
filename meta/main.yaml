@@ -1,8 +1,8 @@
 galaxy_info:
   author: Jacob Hanafin
-  description: A base role that should be applied to all servers
+  description: Install a self contained NextCloud server
   namespace: daemonslayer2048
-  role_name: caddy
+  role_name: nextcloud
   license: GPL-3.0-only
   min_ansible_version: 2.9
   platforms:
